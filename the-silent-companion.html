@@ -418,6 +418,153 @@ body{
 }
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
 
+/* ============================================================
+   TCG 开包舞台（精简版：点击撕包 → 3D 翻卡 → 归档入册）
+   ============================================================ */
+.pack-stage{
+  position:fixed;inset:0;z-index:90;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(247,245,240,.97);backdrop-filter:blur(10px);
+  opacity:0;pointer-events:none;transition:opacity .4s ease;
+  padding:34px 20px;
+}
+.pack-stage.on{opacity:1;pointer-events:auto;}
+.pack-close{
+  position:absolute;top:16px;right:20px;z-index:5;
+  appearance:none;background:transparent;border:1px solid var(--line);
+  color:var(--ink-soft);font-family:var(--sans);font-weight:300;font-size:9px;
+  letter-spacing:.26em;text-transform:uppercase;padding:7px 14px;cursor:pointer;
+}
+.pack-close:hover{color:var(--ink);border-color:var(--line-strong);}
+.pack-zone{
+  position:relative;display:flex;align-items:center;justify-content:center;
+  min-height:320px;
+}
+/* —— 铝箔卡包 —— */
+.foil-pack{
+  position:relative;width:196px;height:300px;cursor:pointer;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 15px,rgba(255,255,255,.16) 15px 16px,rgba(42,40,38,.05) 16px 19px,transparent 19px 32px),
+    linear-gradient(104deg,#cdd0d5 0%,#f6f7f8 24%,#b8bdc4 48%,#e9ebee 66%,#adb2ba 84%,#e0e2e6 100%);
+  clip-path:polygon(0 0,24.5px 10px,49px 0,73.5px 10px,98px 0,122.5px 10px,147px 0,171.5px 10px,196px 0,196px 300px,171.5px 290px,147px 300px,122.5px 290px,98px 300px,73.5px 290px,49px 300px,24.5px 290px,0 300px);
+  box-shadow:0 18px 34px rgba(42,40,38,.22);
+  transition:opacity .45s ease,transform .55s ease;
+}
+.foil-pack::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(118deg,rgba(255,255,255,.35),transparent 34%,transparent 60%,rgba(255,255,255,.12));
+  mix-blend-mode:screen;
+}
+.pack-tear-strip{
+  position:absolute;top:4px;left:0;right:0;height:16px;z-index:2;
+  border-top:1px dashed rgba(255,255,255,.75);
+  text-align:center;font-family:var(--sans);font-weight:300;font-size:6.5px;
+  letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.9);
+  padding-top:2px;text-shadow:0 0 3px rgba(42,40,38,.35);
+  transition:transform .45s cubic-bezier(.2,.8,.3,1),opacity .4s;
+}
+.pack-label{
+  position:absolute;left:16px;right:16px;bottom:26px;text-align:center;
+  font-family:var(--sans);font-weight:300;font-size:8px;letter-spacing:.24em;
+  text-transform:uppercase;color:rgba(42,40,38,.55);
+}
+.pack-hint{
+  position:absolute;left:0;right:0;top:44%;text-align:center;
+  font-family:var(--hand);font-size:21px;color:var(--ink-soft);transform:rotate(-2deg);
+}
+.pack-tear-strip.torn{transform:rotate(12deg) translateY(-46px);opacity:0;}
+.foil-pack.torn{animation:packShake .45s ease;}
+.foil-pack.gone{opacity:0;transform:translateY(150px);}
+@keyframes packShake{
+  0%,100%{transform:translateX(0);}
+  20%{transform:translateX(-3px) rotate(-.6deg);}
+  50%{transform:translateX(3px) rotate(.6deg);}
+  75%{transform:translateX(-2px);}
+}
+/* —— 卡叠 —— */
+.pk-cards{
+  position:relative;width:200px;height:300px;perspective:1000px;
+  opacity:0;transition:opacity .35s ease;
+}
+.pk-cards.show{opacity:1;}
+.pk-cards.done{display:flex;flex-direction:row;align-items:flex-start;justify-content:center;gap:20px;width:auto;height:auto;transform:scale(.6);}
+.pk-card{
+  position:absolute;top:0;left:0;width:200px;height:300px;
+  appearance:none;background:transparent;border:none;padding:0;cursor:pointer;
+  transform-style:preserve-3d;
+  transition:transform .55s cubic-bezier(.3,.72,.3,1);
+  outline:none;
+}
+.pk-card:nth-child(1){z-index:4;transform:translateY(0);}
+.pk-card:nth-child(2){z-index:3;transform:translateY(11px);}
+.pk-card:nth-child(3){z-index:2;transform:translateY(22px);}
+.pk-card.flipped{transform:translateY(8px) rotateY(180deg);}
+.pk-face{
+  position:absolute;inset:0;border-radius:8px;overflow:hidden;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.pk-back{
+  background:linear-gradient(135deg,#3c3c43,#575761 45%,#3c3c43);
+  box-shadow:0 8px 20px rgba(42,40,38,.28);
+}
+.pk-back-mark{width:58px;height:58px;border:1px solid rgba(255,255,255,.4);border-radius:50%;position:relative;}
+.pk-back-mark::after{content:'';position:absolute;inset:15px;border:1px solid rgba(255,255,255,.32);border-radius:50%;}
+.pk-front{
+  transform:rotateY(180deg);
+  background:var(--paper-card);border:1px solid rgba(42,40,38,.16);
+  box-shadow:0 10px 26px rgba(42,40,38,.2);
+}
+.pk-img{flex:1;width:100%;overflow:hidden;background:var(--paper-deep);}
+.pk-img img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.86) contrast(.97);}
+.pk-meta{width:100%;text-align:center;padding:10px 8px 12px;font-family:var(--sans);}
+.pk-no{display:block;font-family:var(--type);font-size:8px;letter-spacing:.2em;color:var(--ink-faint);}
+.pk-name{display:block;font-size:9.5px;letter-spacing:.1em;color:var(--ink-soft);margin-top:4px;}
+/* 稀有卡：金框 + UR 角标（无特效） */
+.pk-card.rare .pk-front{border:1px solid rgba(128,96,40,.55);}
+.pk-card.rare .pk-front::before{
+  content:'';position:absolute;inset:6px;z-index:2;pointer-events:none;
+  border:1px solid rgba(128,96,40,.3);border-radius:4px;
+}
+.pk-rare-chip{
+  position:absolute;top:10px;right:10px;z-index:3;
+  font-family:var(--sans);font-weight:300;font-size:8px;letter-spacing:.2em;
+  color:rgba(128,96,40,.9);border:1px solid rgba(128,96,40,.5);
+  padding:3px 7px;background:rgba(250,248,242,.9);
+}
+/* 翻完 → 平铺入场 */
+.pk-cards.done .pk-card{
+  position:relative;z-index:auto;
+  transform:translateY(0) rotateY(180deg);
+  animation:cardSettle .55s cubic-bezier(.2,.8,.2,1) both;
+}
+.pk-cards.done .pk-card:nth-child(1){animation-delay:.05s;}
+.pk-cards.done .pk-card:nth-child(2){animation-delay:.15s;}
+.pk-cards.done .pk-card:nth-child(3){animation-delay:.25s;}
+@keyframes cardSettle{from{transform:translateY(26px) rotateY(180deg) scale(.92);opacity:.4;}to{transform:translateY(0) rotateY(180deg) scale(1);opacity:1;}}
+/* —— 归档按钮 —— */
+.pk-archive{
+  margin-top:30px;appearance:none;cursor:pointer;
+  background:transparent;border:1px solid var(--line-strong);
+  color:var(--ink);font-family:var(--sans);font-weight:300;font-size:10px;
+  letter-spacing:.26em;text-transform:uppercase;padding:13px 34px;
+  opacity:0;pointer-events:none;transition:opacity .35s ease,background .3s;
+}
+.pk-archive.on{opacity:1;pointer-events:auto;}
+.pk-archive:hover{background:rgba(255,255,255,.6);}
+.pack-cap{
+  margin-top:22px;font-family:var(--sans);font-weight:300;font-size:9px;
+  letter-spacing:.28em;text-transform:uppercase;color:var(--ink-faint);text-align:center;
+}
+/* —— 收集矩阵：新卡入册压缩态 —— */
+.matrix.compact{transform:scale(.75);transform-origin:top center;}
+.matrix.compact .slot{height:190px;width:150px;}
+.matrix.compact .slot .collect-card{height:216px;transform:translateY(14px);}
+.matrix.compact .polaroid{padding:8px 8px 11px;}
+.matrix.compact .polaroid .cap{font-size:8px;letter-spacing:.08em;}
+.slot-row.extra{margin-top:14px;justify-content:flex-start;}
+.slot-row.extra .slot{margin-right:14px;}
+
 .app-foot{
   position:relative;z-index:70;padding:13px 34px;border-top:1px solid var(--line);
   background:rgba(231,227,219,.88);
@@ -430,6 +577,9 @@ body{
   .app-bar{padding:14px 16px;}
   .app-foot{padding:11px 16px;}
   .stage{padding:18px 12px;}
+  .nav-btn{padding:7px 10px;font-size:8px;letter-spacing:.18em;}
+  .foil-pack{transform:scale(.8);}
+  .pk-cards.done{transform:scale(.52);}
 }
 </style>
 </head>
@@ -445,6 +595,7 @@ body{
       <button class="nav-btn" id="btnPrev" type="button">‹ Prev</button>
       <div class="spread-index" id="spreadIndex">I / V</div>
       <button class="nav-btn" id="btnNext" type="button">Next ›</button>
+      <button class="nav-btn" id="btnPack" type="button">Open Pack</button>
     </nav>
   </header>
 
@@ -479,6 +630,21 @@ body{
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- TCG 开包舞台 -->
+<div class="pack-stage" id="packStage" role="dialog" aria-modal="true" aria-label="open a booster pack">
+  <button class="pack-close" id="packClose" type="button">× Close</button>
+  <div class="pack-zone" id="packZone">
+    <div class="foil-pack" id="foilPack" role="button" tabindex="0" aria-label="tear open the booster pack">
+      <span class="pack-tear-strip" id="tearStrip">tear here</span>
+      <span class="pack-hint">点击撕开</span>
+      <span class="pack-label">Booster &middot; The Silent Companion</span>
+    </div>
+    <div class="pk-cards" id="pkCards"></div>
+  </div>
+  <button class="pk-archive" id="pkArchive" type="button">放入收集册 · Archive into Book</button>
+  <div class="pack-cap" id="packCap">一包三张 · 末尾藏有一张稀有卡</div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
 <script>
@@ -560,6 +726,22 @@ const CARDS = [
     timestamp: '22:17 PM', location: 'Doorway',
     imageSrc: IMGS.gaze, isCollected: false,
     noteText: 'I looked away for one minute. She was watching the shadow watch her back.',
+  },
+  {
+    id: 'c4', indexNumber: '04', title: 'Drinking water',
+    cardTitle: '喝水时', cardSub: 'Drinking Hour',
+    timestamp: '14:22 PM', location: 'Kitchen Corner',
+    imageSrc: img('Desaturated film photograph of a gray tabby cat drinking from a low ceramic water bowl on a tiled kitchen floor, soft window light, low contrast muted warm grey tones, fine film grain, Kinfolk quiet domestic scene, generous negative space', 'square'),
+    isCollected: false,
+    noteText: 'Four deliberate sips, then she rests her chin on the rim of the bowl, reconsidering the water entirely.',
+  },
+  {
+    id: 'c5', indexNumber: '05', title: 'The cardboard kingdom',
+    cardTitle: '纸箱王国', cardSub: 'Cardboard Kingdom',
+    timestamp: '16:47 PM', location: 'Study, by the shelf',
+    imageSrc: img('Desaturated film photograph of a gray tabby cat curled inside a plain cardboard box on a wooden floor, soft diffused daylight, low contrast muted warm grey tones, fine film grain, quiet minimal Kinfolk domestic scene', 'square'),
+    isCollected: false,
+    noteText: 'A plain box is promoted to a palace the moment she steps inside. Rent is collected in affection.',
   },
 ];
 const byId = id => CARDS.find(c => c.id === id);
@@ -648,7 +830,7 @@ const matrixPage =
   '<div class="page-content">' +
     '<div class="kicker">II · Collection · Three Observations</div>' +
     '<div class="rule"></div>' +
-    '<div class="matrix">' +
+    '<div class="matrix" id="matrixEl">' +
       '<div class="slot-row">' +
         '<div class="slot">' +
           '<button type="button" class="collect-card" data-card="c1" aria-label="Open card No. 01">' +
@@ -961,6 +1143,174 @@ bookEl.addEventListener('click', e => {
   viewed.add(id);
   if (viewed.has('c1') && viewed.has('c2')) unlockCardC();
 });
+
+/* ============================================================
+   TCG 开包系统（精简版）：IDLE → 撕包 → 逐张翻卡 → 归档入册
+   ============================================================ */
+const packStage = document.getElementById('packStage');
+const foilPack = document.getElementById('foilPack');
+const tearStrip = document.getElementById('tearStrip');
+const pkCards = document.getElementById('pkCards');
+const pkArchive = document.getElementById('pkArchive');
+const packCap = document.getElementById('packCap');
+const COMMON_POOL = ['c4', 'c5'];
+const RARE_ID = 'c3';
+
+let packBusy = false;
+let stackOpened = [];   /* 包内卡 id 顺序：普通 → 普通 → 稀有（末位） */
+let flipCount = 0;
+
+function playTear() {
+  try {
+    const ac = ctx(), t = ac.currentTime, dur = .26;
+    const buf = ac.createBuffer(1, Math.floor(ac.sampleRate * dur), ac.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) {
+      const p = i / d.length;
+      d[i] = (Math.random() * 2 - 1) * (1 - p) * (0.4 + 0.6 * (i % 7) / 7);
+    }
+    const src = ac.createBufferSource(); src.buffer = buf;
+    const hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1600;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.exponentialRampToValueAtTime(.08, t + .02);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    src.connect(hp).connect(g).connect(ac.destination);
+    src.start(t); src.stop(t + dur);
+    const o = ac.createOscillator();
+    o.type = 'square'; o.frequency.value = 3400;
+    const og = ac.createGain();
+    og.gain.setValueAtTime(.0001, t);
+    og.gain.exponentialRampToValueAtTime(.02, t + .01);
+    og.gain.exponentialRampToValueAtTime(.0001, t + .1);
+    o.connect(og).connect(ac.destination);
+    o.start(t); o.stop(t + .12);
+  } catch (e) {}
+}
+
+function openPack() {
+  if (packBusy) return;
+  stackOpened = COMMON_POOL.slice().sort(() => Math.random() - .5).concat(RARE_ID);
+  flipCount = 0;
+  foilPack.classList.remove('torn', 'gone');
+  tearStrip.classList.remove('torn');
+  pkCards.classList.remove('show', 'done');
+  pkArchive.classList.remove('on');
+  packCap.textContent = '一包三张 · 末尾藏有一张稀有卡';
+  pkCards.innerHTML = '';
+  packStage.classList.add('on');
+}
+
+function tearHandler(e) {
+  if (e && e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+  if (e && e.type === 'keydown') e.preventDefault();
+  tear();
+}
+
+function tear() {
+  if (packBusy) return;
+  packBusy = true;
+  playTear();
+  tearStrip.classList.add('torn');
+  foilPack.classList.add('torn');
+  setTimeout(() => {
+    foilPack.classList.add('gone');
+    buildCards();
+    packCap.textContent = '逐张点击卡牌翻面';
+    packBusy = false;
+  }, 500);
+}
+
+function buildCards() {
+  pkCards.innerHTML = '';
+  stackOpened.forEach((id, i) => {
+    const rare = id === RARE_ID;
+    const card = byId(id);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pk-card' + (rare ? ' rare' : '');
+    btn.setAttribute('aria-label', 'reveal card ' + (i + 1));
+    btn.innerHTML =
+      '<span class="pk-face pk-back"><span class="pk-back-mark"></span></span>' +
+      '<span class="pk-face pk-front">' +
+        (rare ? '<span class="pk-rare-chip">UR</span>' : '') +
+        '<span class="pk-img"><img src="' + card.imageSrc + '" alt="' + card.title + '"></span>' +
+        '<span class="pk-meta"><span class="pk-no">No. ' + card.indexNumber + '</span>' +
+        '<span class="pk-name">' + card.cardTitle + ' — ' + card.cardSub + '</span></span>' +
+      '</span>';
+    btn.addEventListener('click', () => flipCard(btn, id));
+    pkCards.appendChild(btn);
+  });
+  pkCards.classList.add('show');
+}
+
+function flipCard(btn, id) {
+  if (btn.classList.contains('flipped')) return;
+  btn.classList.add('flipped');
+  flipCount++;
+  playHeavyCard();
+  if (id === RARE_ID) playStamp();
+  if (flipCount >= stackOpened.length) {
+    setTimeout(() => {
+      pkCards.classList.add('done');
+      pkArchive.classList.add('on');
+      packCap.textContent = '全卡已揭晓 · 归档入册';
+    }, 550);
+  }
+}
+
+function addExtraSlot(card) {
+  const matrix = document.getElementById('matrixEl');
+  let row = matrix.querySelector('.slot-row.extra');
+  if (!row) {
+    row = document.createElement('div');
+    row.className = 'slot-row extra';
+    matrix.appendChild(row);
+    matrix.classList.add('compact');
+  }
+  if (row.querySelector('[data-card="' + card.id + '"]')) return;
+  const slot = document.createElement('div');
+  slot.className = 'slot';
+  slot.innerHTML =
+    '<button type="button" class="collect-card" data-card="' + card.id + '" aria-label="Open card No. ' + card.indexNumber + '">' +
+      '<span class="polaroid">' + grainLayer() +
+        '<span class="pg-img"><img src="' + card.imageSrc + '" alt="' + card.title + '" onerror="this.parentElement.classList.add(\'pg-img--flat\')"></span>' +
+        '<span class="cap">No. ' + card.indexNumber + ' · ' + card.cardTitle + '</span>' +
+      '</span>' +
+    '</button>';
+  row.appendChild(slot);
+}
+
+function archivePack() {
+  if (packBusy) return;
+  packBusy = true;
+  pkArchive.classList.remove('on');
+  let added = 0;
+  stackOpened.forEach(id => {
+    const card = byId(id);
+    if (id === RARE_ID) { unlockCardC(); return; }
+    if (card && !card.isCollected) { card.isCollected = true; added++; addExtraSlot(card); }
+  });
+  packCap.textContent = added ? '已放入收集册 · ' + added + ' 张新卡入册' : '已放入收集册（均为已有卡）';
+  toast('已放入收集册 — ' + stackOpened.length + ' 张');
+  setTimeout(() => {
+    packStage.classList.remove('on');
+    packBusy = false;
+  }, 800);
+}
+
+document.getElementById('btnPack').addEventListener('click', openPack);
+foilPack.addEventListener('click', tearHandler);
+foilPack.addEventListener('keydown', tearHandler);
+document.getElementById('packClose').addEventListener('click', () => {
+  if (packBusy) return;
+  packStage.classList.remove('on');
+  pkCards.classList.remove('show');
+  foilPack.classList.remove('torn', 'gone');
+  tearStrip.classList.remove('torn');
+  pkArchive.classList.remove('on');
+});
+pkArchive.addEventListener('click', archivePack);
 </script>
 </body>
 </html>
