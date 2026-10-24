@@ -485,7 +485,7 @@ body{
   transition:transform .4s cubic-bezier(.2,.8,.3,1),opacity .4s;
 }
 .pack-label{
-  position:absolute;left:16px;right:16px;bottom:30px;text-align:center;
+  position:absolute;left:16px;right:16px;bottom:30px;text-align:center;white-space:nowrap;
   font-family:var(--sans);font-weight:300;font-size:8px;letter-spacing:.24em;
   text-transform:uppercase;color:rgba(42,40,38,.55);
 }
@@ -572,8 +572,8 @@ body{
 .pk-deck.done .pk-card:nth-child(2){animation-delay:.14s;}
 .pk-deck.done .pk-card:nth-child(3){animation-delay:.23s;}
 @keyframes cardSettle{
-  from{transform:translateY(24px) rotateY(180deg) scale(.9);opacity:.3;}
-  to{transform:translateY(0) rotateY(180deg) scale(1);opacity:1;}
+  from{opacity:.25;}
+  to{opacity:1;}
 }
 /* —— 归档按钮 —— */
 .pk-archive{
@@ -675,7 +675,7 @@ body{
         <span class="pack-body"></span>
         <span class="pack-tear-strip" id="tearStrip">tear here</span>
         <span class="pack-hint">点击撕开</span>
-        <span class="pack-label">Booster &middot; Furry Issue / 毛球特刊</span>
+        <span class="pack-label">Booster &middot; Furry Issue</span>
       </div>
     </div>
     <div class="pk-area" id="pkArea">
@@ -1320,10 +1320,11 @@ function flipCard(el, id) {
   flipCount++;
   playHeavyCard();
   if (id === RARE_ID) playStamp();
+  /* 立即锁定正面朝向（rotateY 180°），避免动画结束瞬间回到卡背 */
+  el.style.setProperty('--rot', 'rotateY(180deg)');
   el.classList.add('flipping');
   setTimeout(() => {
     el.classList.remove('flipping');
-    el.style.setProperty('--rot', 'rotateY(180deg)');
   }, 520);
   if (flipCount >= stackOpened.length) {
     setTimeout(() => {
@@ -1399,8 +1400,10 @@ document.addEventListener('pointercancel', onDeckUp);
 pkDeck.addEventListener('click', e => {
   const el = e.target.closest('.pk-card');
   if (!el || el.dataset.pos !== '0') return;
-  if (el._flipped || el.classList.contains('held') || el.classList.contains('flipping')) return;
+  if (el.classList.contains('held') || el.classList.contains('flipping')) return;
   if (dragging && dragging.moved) return;
+  /* 已翻开的顶卡再点一下 → 沉到叠底，露出下一张 */
+  if (el._flipped) { if (!allFlipped) sinkToBottom(el); return; }
   flipCard(el, el.dataset.id);
 });
 
@@ -1459,6 +1462,10 @@ document.getElementById('packClose').addEventListener('click', () => {
   pkArchive.classList.remove('on');
 });
 pkArchive.addEventListener('click', archivePack);
+
+/* 进入页面：先开卡包，收集归档后自动关闭舞台、进入杂志 */
+openPack();
+
 </script>
 </body>
 </html>
